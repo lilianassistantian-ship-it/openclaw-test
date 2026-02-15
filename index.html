@@ -492,21 +492,28 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ timestamp: new Date().toISOString() })
             })
-            .then(response => response.json())
+            .then(async response => {
+                const text = await response.text();
+                console.log('Raw response:', text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Invalid JSON response: ' + text);
+                }
+            })
             .then(data => {
+                console.log('Parsed data:', data);
                 if (data.success) {
                     btn.textContent = '✅ Request Sent!';
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.textContent = '🔄 Request Update';
-                    }, 3000);
                 } else {
-                    throw new Error(data.error || 'Unknown error');
+                    throw new Error(data.error || 'Request failed');
                 }
             })
             .catch(error => {
                 console.error('Webhook error:', error);
                 btn.textContent = '❌ Failed - Try Again';
+            })
+            .finally(() => {
                 setTimeout(() => {
                     btn.disabled = false;
                     btn.textContent = '🔄 Request Update';
