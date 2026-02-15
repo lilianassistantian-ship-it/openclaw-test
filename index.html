@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Work Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #58a6ff;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #8b949e;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #58a6ff;
+        }
+        .stat-card p {
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .column {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .column h2 {
+            color: #f0f6fc;
+            font-size: 1.1rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+            margin-bottom: 15px;
+        }
+        .column.done h2 { border-color: #238636; }
+        .column.in-progress h2 { border-color: #9e6a03; }
+        .column.backlog h2 { border-color: #8b949e; }
+        .item {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .item:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+        .item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .item-meta {
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-top: 8px;
+        }
+        .tag.infra { background: #1f6feb; color: white; }
+        .tag.integration { background: #8957e5; color: white; }
+        .tag.tracking { background: #d29922; color: black; }
+        .last-updated {
+            text-align: center;
+            margin-top: 40px;
+            color: #6e7681;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 768px) {
+            .board { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦞 OpenClaw Work Tracker</h1>
+        <p>Real-time project status for Kimi Claw AI Assistant</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3 id="done-count">0</h3>
+            <p>Completed</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="progress-count">0</h3>
+            <p>In Progress</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="backlog-count">0</h3>
+            <p>Backlog</p>
+        </div>
+        <div class="stat-card">
+            <h3 id="total-count">0</h3>
+            <p>Total Tasks</p>
+        </div>
+    </div>
+
+    <div class="board">
+        <div class="column done">
+            <h2>✅ Done</h2>
+            <div id="done-items"></div>
+        </div>
+        <div class="column in-progress">
+            <h2>🔄 In Progress</h2>
+            <div id="progress-items"></div>
+        </div>
+        <div class="column backlog">
+            <h2>📋 Backlog</h2>
+            <div id="backlog-items"></div>
+        </div>
+    </div>
+
+    <div class="last-updated">
+        Last updated: <span id="timestamp"></span>
+    </div>
+
+    <script>
+        // Static data for now - will be replaced with API calls
+        const tasks = {
+            done: [
+                { title: "OpenClaw updated to v2026.2.14", tag: "infra", date: "2026-02-16" },
+                { title: "Telegram bot configured", tag: "integration", date: "2026-02-16" },
+                { title: "Gmail integration (gog)", tag: "integration", date: "2026-02-16" },
+                { title: "GitHub access configured", tag: "integration", date: "2026-02-16" },
+                { title: "Email policy established", tag: "infra", date: "2026-02-16" },
+                { title: "TARS personality configured", tag: "infra", date: "2026-02-16" }
+            ],
+            inProgress: [
+                { title: "Build kanban tracker system", tag: "tracking", date: "2026-02-16" },
+                { title: "Create live dashboard webpage", tag: "tracking", date: "2026-02-16" },
+                { title: "API enablement pending restart", tag: "infra", date: "2026-02-16" }
+            ],
+            backlog: [
+                { title: "Twitter/X monitoring setup", tag: "integration", date: "2026-02-16" },
+                { title: "Heartbeat checks", tag: "infra", date: "2026-02-16" },
+                { title: "Proactive notifications", tag: "infra", date: "2026-02-16" },
+                { title: "GitHub project automation", tag: "integration", date: "2026-02-16" },
+                { title: "User guide documentation", tag: "tracking", date: "2026-02-16" }
+            ]
+        };
+
+        function renderItems(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map(item => `
+                <div class="item">
+                    <div class="item-title">${item.title}</div>
+                    <div class="item-meta">${item.date}</div>
+                    <span class="tag ${item.tag}">${item.tag}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('done-count').textContent = tasks.done.length;
+            document.getElementById('progress-count').textContent = tasks.inProgress.length;
+            document.getElementById('backlog-count').textContent = tasks.backlog.length;
+            document.getElementById('total-count').textContent = 
+                tasks.done.length + tasks.inProgress.length + tasks.backlog.length;
+        }
+
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        }
+
+        // Initial render
+        renderItems('done-items', tasks.done);
+        renderItems('progress-items', tasks.inProgress);
+        renderItems('backlog-items', tasks.backlog);
+        updateStats();
+        updateTimestamp();
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            location.reload();
+        }, 300000);
+    </script>
+</body>
+</html>
