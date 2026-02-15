@@ -100,11 +100,59 @@
         .tag.infra { background: #1f6feb; color: white; }
         .tag.integration { background: #8957e5; color: white; }
         .tag.tracking { background: #d29922; color: black; }
-        .last-updated {
-            text-align: center;
-            margin-top: 40px;
-            color: #6e7681;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            padding: 25px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #f0f6fc;
+        }
+        .modal h3 {
+            color: #58a6ff;
+            margin-bottom: 15px;
+            padding-right: 30px;
+        }
+        .modal-description {
+            color: #c9d1d9;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .modal-meta {
+            color: #8b949e;
             font-size: 0.85rem;
+            border-top: 1px solid #30363d;
+            padding-top: 15px;
         }
         @media (max-width: 768px) {
             .board { grid-template-columns: 1fr; }
@@ -156,41 +204,83 @@
         Last updated: <span id="timestamp"></span>
     </div>
 
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h3 id="modal-title"></h3>
+            <div class="modal-description" id="modal-description"></div>
+            <div class="modal-meta" id="modal-meta"></div>
+        </div>
+    </div>
+
     <script>
         // Static data for now - will be replaced with API calls
         const tasks = {
             done: [
-                { title: "OpenClaw updated to v2026.2.14", tag: "infra", date: "2026-02-16" },
-                { title: "Telegram bot configured", tag: "integration", date: "2026-02-16" },
-                { title: "Gmail integration (gog)", tag: "integration", date: "2026-02-16" },
-                { title: "GitHub access configured", tag: "integration", date: "2026-02-16" },
-                { title: "Email policy established", tag: "infra", date: "2026-02-16" },
-                { title: "TARS personality configured", tag: "infra", date: "2026-02-16" }
+                { title: "OpenClaw updated to v2026.2.14", tag: "infra", date: "2026-02-16", description: "Updated OpenClaw to the latest version (2026.2.14). This includes security patches, new features, and bug fixes. The update was applied via the gateway restart mechanism.", details: "Version: 2026.2.14 | Method: npm update" },
+                { title: "Telegram bot configured", tag: "integration", date: "2026-02-16", description: "Successfully configured and paired Telegram bot for OpenClaw. User ID 8575575430 is now approved and can communicate with the AI assistant through Telegram.", details: "Bot Token: 8534...EFmc | User: 8575575430" },
+                { title: "Gmail integration (gog)", tag: "integration", date: "2026-02-16", description: "Installed and configured gog CLI for Google Workspace integration. OAuth authentication completed for lilian.assistant.ian@gmail.com with access to Gmail, Calendar, Drive, Sheets, and Docs.", details: "Account: lilian.assistant.ian@gmail.com | Services: Gmail, Calendar, Drive, Sheets, Docs" },
+                { title: "GitHub access configured", tag: "integration", date: "2026-02-16", description: "Set up GitHub access using Personal Access Token. Created test repository and verified push/pull capabilities. Account: lilianassistantian-ship-it.", details: "Token: ghp_...FUMW | Repo: openclaw-test" },
+                { title: "Email policy established", tag: "infra", date: "2026-02-16", description: "Created strict email policy: never send emails to anyone except ian.bezahler@gmail.com without explicit permission. Documented in MEMORY.md for persistence.", details: "Policy: Hard rule | Exceptions: None without explicit permission" },
+                { title: "TARS personality configured", tag: "infra", date: "2026-02-16", description: "Configured AI personality after TARS from Interstellar. Humor setting: 75%, Honesty setting: 90%. Direct, no-nonsense communication style with dry wit.", details: "Reference: Interstellar (2014) | Settings: Humor 75%, Honesty 90%" }
             ],
             inProgress: [
-                { title: "Build kanban tracker system", tag: "tracking", date: "2026-02-16" },
-                { title: "Create live dashboard webpage", tag: "tracking", date: "2026-02-16" },
-                { title: "API enablement pending restart", tag: "infra", date: "2026-02-16" }
+                { title: "Build kanban tracker system", tag: "tracking", date: "2026-02-16", description: "Creating a comprehensive project tracking system with kanban board. Includes GitHub Projects setup and custom webpage dashboard for mobile and desktop viewing.", details: "Status: 80% complete | Blocker: GitHub API rate limits" },
+                { title: "Create live dashboard webpage", tag: "tracking", date: "2026-02-16", description: "Building mobile-friendly dashboard webpage using GitHub Pages. Features dark theme, clickable cards with details, auto-refresh, and responsive design.", details: "URL: lilianassistantian-ship-it.github.io/openclaw-test/ | Tech: HTML/CSS/JS" },
+                { title: "API enablement pending restart", tag: "infra", date: "2026-02-16", description: "Google Workspace APIs (Calendar, Drive, Sheets, Docs) are enabled in Google Cloud Console but require gateway restart to take full effect. GOG_KEYRING_PASSWORD saved in config.", details: "APIs: Calendar, Drive, Sheets, Docs | Status: Enabled, pending restart" }
             ],
             backlog: [
-                { title: "Twitter/X monitoring setup", tag: "integration", date: "2026-02-16" },
-                { title: "Heartbeat checks", tag: "infra", date: "2026-02-16" },
-                { title: "Proactive notifications", tag: "infra", date: "2026-02-16" },
-                { title: "GitHub project automation", tag: "integration", date: "2026-02-16" },
-                { title: "User guide documentation", tag: "tracking", date: "2026-02-16" }
+                { title: "Twitter/X monitoring setup", tag: "integration", date: "2026-02-16", description: "Set up automated monitoring of Twitter/X for OpenClaw updates, security advisories, and new features. Cron job created to check every 2 hours.", details: "Schedule: Every 2 hours | Status: Cron job pending activation" },
+                { title: "Heartbeat checks", tag: "infra", date: "2026-02-16", description: "Implement periodic heartbeat checks for system health, email monitoring, calendar alerts, and proactive notifications to user.", details: "Frequency: Every 30 minutes | Features: Health, email, calendar" },
+                { title: "Proactive notifications", tag: "infra", date: "2026-02-16", description: "Configure AI to proactively notify user about important events, upcoming meetings, urgent emails, and system issues without being prompted.", details: "Channels: Telegram | Triggers: Calendar, email, system events" },
+                { title: "GitHub project automation", tag: "integration", date: "2026-02-16", description: "Automate kanban board updates by linking GitHub Issues to the dashboard. Auto-move items between columns based on status changes.", details: "Status: Blocked by API rate limits | ETA: After rate limit reset" },
+                { title: "User guide documentation", tag: "tracking", date: "2026-02-16", description: "Create comprehensive user guide for accessing kanban board, mobile setup, troubleshooting, and best practices for working with OpenClaw.", details: "Format: Google Doc + Webpage | Audience: Non-technical users" }
             ]
         };
 
+        let currentModal = null;
+
         function renderItems(containerId, items) {
             const container = document.getElementById(containerId);
-            container.innerHTML = items.map(item => `
-                <div class="item">
+            container.innerHTML = items.map((item, index) => `
+                <div class="item" onclick="openModal('${containerId}', ${index})">
                     <div class="item-title">${item.title}</div>
                     <div class="item-meta">${item.date}</div>
                     <span class="tag ${item.tag}">${item.tag}</span>
                 </div>
             `).join('');
         }
+
+        function openModal(containerId, index) {
+            const column = containerId.replace('-items', '');
+            const items = tasks[column === 'done' ? 'done' : column === 'progress' ? 'inProgress' : 'backlog'];
+            const item = items[index];
+            
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-description').textContent = item.description;
+            document.getElementById('modal-meta').textContent = item.details;
+            document.getElementById('modal').classList.add('active');
+            currentModal = 'modal';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            currentModal = null;
+        }
+
+        // Close modal on outside click
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && currentModal) {
+                closeModal();
+            }
+        });
 
         function updateStats() {
             document.getElementById('done-count').textContent = tasks.done.length;
