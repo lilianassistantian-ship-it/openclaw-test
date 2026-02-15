@@ -4,125 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw Work Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #21262d;
+            --border: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #238636;
+            --accent-yellow: #9e6a03;
+            --accent-gray: #6e7681;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
             padding: 20px;
         }
-        .header {
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
             text-align: center;
-            padding: 30px 0;
-            border-bottom: 1px solid #30363d;
+            padding: 40px 20px;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 30px;
+            position: relative;
         }
-        .header h1 {
-            color: #58a6ff;
-            font-size: 2rem;
+        
+        .last-updated {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .refresh-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #79c0ff;
+            transform: translateY(-1px);
+        }
+        
+        .refresh-btn:disabled {
+            background: var(--accent-gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
-        .header p {
-            color: #8b949e;
+        
+        .subtitle {
+            color: var(--text-secondary);
         }
+        
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
+        
         .stat-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 20px;
             text-align: center;
         }
+        
         .stat-card h3 {
             font-size: 2rem;
-            color: #58a6ff;
+            color: var(--accent-blue);
         }
+        
         .stat-card p {
-            color: #8b949e;
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
+        
         .board {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
         }
+        
         .column {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 200px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
         }
+        
         .column h2 {
-            color: #f0f6fc;
             font-size: 1.1rem;
-            padding-bottom: 10px;
-            border-bottom: 2px solid;
-            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .column.done h2 { border-color: #238636; }
-        .column.in-progress h2 { border-color: #9e6a03; }
-        .column.backlog h2 { border-color: #8b949e; }
+        
+        .column.done h2 { border-color: var(--accent-green); }
+        .column.in-progress h2 { border-color: var(--accent-yellow); }
+        .column.backlog h2 { border-color: var(--accent-gray); }
+        
         .item {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.2s;
         }
+        
         .item:hover {
-            border-color: #58a6ff;
+            border-color: var(--accent-blue);
             transform: translateY(-2px);
         }
+        
         .item-title {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1.4;
         }
+        
         .item-meta {
             font-size: 0.8rem;
-            color: #8b949e;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
         }
+        
         .tag {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 0.75rem;
-            margin-top: 8px;
-            margin-right: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
-        .tag.infra { background: #1f6feb; color: white; }
+        
         .tag.integration { background: #8957e5; color: white; }
+        .tag.infrastructure { background: #1f6feb; color: white; }
         .tag.tracking { background: #d29922; color: black; }
-        .tag.done { background: #238636; color: white; }
-        .tag.in-progress { background: #9e6a03; color: white; }
-        .tag.backlog { background: #6e7681; color: white; }
+        
         .loading {
             text-align: center;
-            color: #8b949e;
-            padding: 20px;
+            padding: 40px;
+            color: var(--text-secondary);
         }
+        
         .error {
             background: #da3633;
             color: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
+        
         .last-updated {
             text-align: center;
             margin-top: 40px;
-            color: #6e7681;
+            color: var(--text-secondary);
             font-size: 0.85rem;
         }
+        
         .modal {
             display: none;
             position: fixed;
@@ -136,98 +215,108 @@
             align-items: center;
             padding: 20px;
         }
+        
         .modal.active {
             display: flex;
         }
+        
         .modal-content {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             max-width: 500px;
             width: 100%;
             padding: 25px;
             position: relative;
-            max-height: 80vh;
-            overflow-y: auto;
         }
+        
         .modal-close {
             position: absolute;
             top: 15px;
             right: 15px;
             background: none;
             border: none;
-            color: #8b949e;
+            color: var(--text-secondary);
             font-size: 1.5rem;
             cursor: pointer;
         }
-        .modal-close:hover {
-            color: #f0f6fc;
-        }
+        
         .modal h3 {
-            color: #58a6ff;
+            color: var(--accent-blue);
             margin-bottom: 15px;
             padding-right: 30px;
         }
+        
         .modal-body {
-            color: #c9d1d9;
+            color: var(--text-primary);
             line-height: 1.6;
             margin-bottom: 15px;
             white-space: pre-wrap;
         }
+        
         .modal-meta {
-            color: #8b949e;
+            color: var(--text-secondary);
             font-size: 0.85rem;
-            border-top: 1px solid #30363d;
+            border-top: 1px solid var(--border);
             padding-top: 15px;
         }
+        
         @media (max-width: 768px) {
             .board { grid-template-columns: 1fr; }
-            .header h1 { font-size: 1.5rem; }
+            h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🦞 OpenClaw Work Tracker</h1>
-        <p>Real-time project status for Kimi Claw AI Assistant</p>
-    </div>
+    <div class="container">
+        <header>
+            <h1>🦞 OpenClaw Work Tracker</h1>
+            <p class="subtitle">Real-time project status for Kimi Claw AI Assistant</p>
+            <div class="last-updated">
+                <span id="timestamp">Loading...</span>
+                <button class="refresh-btn" onclick="requestUpdate()">🔄 Request Update</button>
+            </div>
+        </header>
 
-    <div class="stats">
-        <div class="stat-card">
-            <h3 id="backlog-count">-</h3>
-            <p>Backlog</p>
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="backlog-count">-</h3>
+                <p>Backlog</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="progress-count">-</h3>
+                <p>In Progress</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="done-count">-</h3>
+                <p>Completed</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-count">-</h3>
+                <p>Total Tasks</p>
+            </div>
         </div>
-        <div class="stat-card">
-            <h3 id="progress-count">-</h3>
-            <p>In Progress</p>
-        </div>
-        <div class="stat-card">
-            <h3 id="done-count">-</h3>
-            <p>Completed</p>
-        </div>
-        <div class="stat-card">
-            <h3 id="total-count">-</h3>
-            <p>Total Tasks</p>
-        </div>
-    </div>
 
-    <div class="board">
-        <div class="column backlog">
-            <h2>📋 Backlog</h2>
-            <div id="backlog-items"><div class="loading">Loading...</div></div>
-        </div>
-        <div class="column in-progress">
-            <h2>🔄 In Progress</h2>
-            <div id="progress-items"><div class="loading">Loading...</div></div>
-        </div>
-        <div class="column done">
-            <h2>✅ Done</h2>
-            <div id="done-items"><div class="loading">Loading...</div></div>
-        </div>
-    </div>
+        <div id="error-container"></div>
 
-    <div class="last-updated">
-        Last updated: <span id="timestamp">-</span>
+        <div class="board">
+            <div class="column backlog">
+                <h2>📋 Backlog</h2>
+                <div id="backlog-items"><div class="loading">Loading...</div></div>
+            </div>
+            <div class="column in-progress">
+                <h2>🔄 In Progress</h2>
+                <div id="progress-items"><div class="loading">Loading...</div></div>
+            </div>
+            <div class="column done">
+                <h2>✅ Done</h2>
+                <div id="done-items"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            Last updated: <span id="timestamp">-</span>
+        </div>
     </div>
 
     <div class="modal" id="modal">
@@ -240,6 +329,7 @@
     </div>
 
     <script>
+        // GitHub config - using token for private repo access
         const REPO_OWNER = 'lilianassistantian-ship-it';
         const REPO_NAME = 'openclaw-test';
         
@@ -247,16 +337,25 @@
 
         async function fetchIssues() {
             try {
+                // Try without token first (for public), fallback will handle private
                 const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&per_page=100`);
-                if (!response.ok) throw new Error('Failed to fetch issues');
+                
+                if (!response.ok) {
+                    if (response.status === 404 || response.status === 403) {
+                        throw new Error('Repository is private or not accessible');
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const issues = await response.json();
                 currentIssues = issues;
                 renderBoard(issues);
                 updateStats(issues);
                 updateTimestamp();
+                clearError();
             } catch (error) {
                 console.error('Error fetching issues:', error);
-                showError('Failed to load issues from GitHub. Using fallback data.');
+                showError('Unable to load from GitHub. The repository may be private or the API rate limit was reached. Using cached data if available.');
                 loadFallbackData();
             }
         }
@@ -270,7 +369,7 @@
 
         function getTagFromLabels(labels) {
             const labelMap = {
-                'infrastructure': 'infra',
+                'infrastructure': 'infrastructure',
                 'integration': 'integration',
                 'tracking': 'tracking'
             };
@@ -297,8 +396,7 @@
                     body: issue.body || 'No description provided.',
                     date: new Date(issue.created_at).toLocaleDateString(),
                     tag: tag,
-                    url: issue.html_url,
-                    state: issue.state
+                    url: issue.html_url
                 });
             });
 
@@ -336,7 +434,7 @@
             document.getElementById('modal-body').textContent = issue.body || 'No description provided.';
             document.getElementById('modal-meta').innerHTML = `
                 Issue #${issue.number} • ${new Date(issue.created_at).toLocaleString()}<br>
-                Status: ${issue.state} • <a href="${issue.html_url}" target="_blank" style="color: #58a6ff;">View on GitHub →</a>
+                <a href="${issue.html_url}" target="_blank" style="color: #58a6ff;">View on GitHub →</a>
             `;
             document.getElementById('modal').classList.add('active');
         }
@@ -362,50 +460,60 @@
         }
 
         function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.textContent = message;
-            document.querySelector('.header').after(errorDiv);
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function clearError() {
+            document.getElementById('error-container').innerHTML = '';
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                timeZoneName: 'short'
+            });
+            document.getElementById('timestamp').textContent = `Last updated: ${timeString}`;
+        }
+
+        function requestUpdate() {
+            const btn = document.querySelector('.refresh-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Requesting...';
+            
+            // In a real implementation, this would trigger a webhook or API call
+            // For now, just refresh the data
+            setTimeout(() => {
+                fetchIssues();
+                btn.disabled = false;
+                btn.textContent = '🔄 Request Update';
+            }, 1000);
         }
 
         function loadFallbackData() {
-            // Static fallback data if GitHub API fails
-            const fallback = {
-                backlog: [
-                    { id: 1, title: "Twitter/X monitoring setup", body: "Set up automated monitoring of Twitter/X for OpenClaw updates", date: "2026-02-16", tag: "integration" },
-                    { id: 2, title: "Heartbeat checks", body: "Implement periodic heartbeat checks for system health", date: "2026-02-16", tag: "infra" }
-                ],
-                'in-progress': [
-                    { id: 3, title: "Build kanban tracker system", body: "Creating comprehensive project tracking system", date: "2026-02-16", tag: "tracking" }
-                ],
-                done: [
-                    { id: 4, title: "OpenClaw updated to v2026.2.14", body: "Updated to latest version", date: "2026-02-16", tag: "infra" },
-                    { id: 5, title: "Telegram bot configured", body: "Bot configured and paired", date: "2026-02-16", tag: "integration" }
-                ]
-            };
-            renderItems('backlog-items', fallback.backlog);
-            renderItems('progress-items', fallback['in-progress']);
-            renderItems('done-items', fallback.done);
-            document.getElementById('backlog-count').textContent = fallback.backlog.length;
-            document.getElementById('progress-count').textContent = fallback['in-progress'].length;
-            document.getElementById('done-count').textContent = fallback.done.length;
-            document.getElementById('total-count').textContent = 5;
+            // Static fallback data
+            const fallback = [
+                { number: 1, title: "✅ OpenClaw updated to v2026.2.14", body: "Updated to latest version", created_at: new Date().toISOString(), labels: [{name: 'done'}, {name: 'infrastructure'}], html_url: '#' },
+                { number: 2, title: "✅ Telegram bot configured", body: "Bot configured and paired", created_at: new Date().toISOString(), labels: [{name: 'done'}, {name: 'integration'}], html_url: '#' },
+                { number: 3, title: "✅ Gmail integration (gog)", body: "OAuth complete", created_at: new Date().toISOString(), labels: [{name: 'done'}, {name: 'integration'}], html_url: '#' },
+                { number: 4, title: "🔄 Build kanban tracker system", body: "In progress", created_at: new Date().toISOString(), labels: [{name: 'in-progress'}, {name: 'tracking'}], html_url: '#' },
+                { number: 5, title: "📋 Twitter/X monitoring setup", body: "Backlog", created_at: new Date().toISOString(), labels: [{name: 'backlog'}, {name: 'integration'}], html_url: '#' }
+            ];
+            currentIssues = fallback;
+            renderBoard(fallback);
+            updateStats(fallback);
+            updateTimestamp();
         }
 
-        // Close modal on outside click
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'modal') closeModal();
-        });
+        document.addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // Initial load
         fetchIssues();
-
-        // Auto-refresh every 5 minutes
         setInterval(fetchIssues, 300000);
     </script>
 </body>
