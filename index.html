@@ -484,15 +484,34 @@
         function requestUpdate() {
             const btn = document.querySelector('.refresh-btn');
             btn.disabled = true;
-            btn.textContent = '⏳ Requesting...';
+            btn.textContent = '⏳ Notifying...';
             
-            // In a real implementation, this would trigger a webhook or API call
-            // For now, just refresh the data
-            setTimeout(() => {
-                fetchIssues();
-                btn.disabled = false;
-                btn.textContent = '🔄 Request Update';
-            }, 1000);
+            // Call the webhook to notify OpenClaw agent
+            fetch('https://kanban-webhook.vercel.app/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ timestamp: new Date().toISOString() })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btn.textContent = '✅ Request Sent!';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.textContent = '🔄 Request Update';
+                    }, 3000);
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            })
+            .catch(error => {
+                console.error('Webhook error:', error);
+                btn.textContent = '❌ Failed - Try Again';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '🔄 Request Update';
+                }, 3000);
+            });
         }
 
         function loadFallbackData() {
